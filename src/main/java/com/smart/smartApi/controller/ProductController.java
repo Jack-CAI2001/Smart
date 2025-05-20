@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/products")
 public class ProductController {
     private final ProductMapper productMapper;
     private final ProductRepository productRepository;
@@ -23,21 +23,37 @@ public class ProductController {
         this.productRepository = productRepository;
     }
 
-    @GetMapping("/product/find/{name}")
-    public List<ProductDto> findByName(@PathVariable String name) {
+    @GetMapping("/{id}")
+    public ProductDto getProductById(@PathVariable Integer id) {
+        return productRepository.findById(id)
+                .map(productMapper::toDto)
+                .orElseThrow(EntityNotFoundException::new);
+    }
+
+
+    @GetMapping
+    public List<ProductDto> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(productMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/search/{name}")
+    public List<ProductDto> searchByName(@PathVariable String name) {
         List<Product> productList = productRepository.findByName(name);
         return productList.stream()
                 .map(productMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    @PostMapping("/product/new")
+
+    @PostMapping
     public ProductDto saveProduct(@RequestBody @NonNull @Valid ProductDto productDto) {
         Product productEntity = productMapper.toEntity(productDto);
         return productMapper.toDto(productRepository.save(productEntity));
     }
 
-    @PostMapping("/product/update")
+    @PutMapping("/update")
     public ProductDto updateProduct(@RequestBody @NonNull ProductDto productDto) {
         if (productDto.getId() == null)
             throw new IllegalArgumentException("Product ID is missing. Use /new to create a product");
