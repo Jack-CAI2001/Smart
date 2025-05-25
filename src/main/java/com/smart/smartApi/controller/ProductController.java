@@ -1,9 +1,10 @@
 package com.smart.smartApi.controller;
 
 import com.smart.smartApi.dto.ProductDto;
+import com.smart.smartApi.dto.ProductPageResponse;
 import com.smart.smartApi.exception.EmptyFileException;
-import com.smart.smartApi.repositories.ProductRepository;
 import com.smart.smartApi.service.ProductService;
+import com.smart.smartApi.utils.AppConstants;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    public ProductController(ProductService productService, ProductRepository productRepository) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
@@ -60,5 +61,21 @@ public class ProductController {
     public ResponseEntity<String> deleteProduct(@PathVariable Integer id) throws IOException {
         productService.deleteProductById(id);
         return ResponseEntity.ok("Product deleted successfully");
+    }
+
+    @GetMapping("/allProductsPage")
+    public ResponseEntity<ProductPageResponse> getAllProductsWithPagination(
+            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize) {
+        return ResponseEntity.ok(productService.getAllProductsWithPagination(pageNumber, pageSize));
+    }
+
+    @GetMapping("/allProductsPageAndSorting")
+    public ResponseEntity<ProductPageResponse> getAllProductsWithPaginationAndSorting(
+            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(defaultValue = AppConstants.SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection) {
+        return ResponseEntity.ok(productService.getAllProductsWithPaginationAndSorting(pageNumber, pageSize, sortBy, sortDirection));
     }
 }

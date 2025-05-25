@@ -1,6 +1,7 @@
 package com.smart.smartApi.service;
 
 import com.smart.smartApi.dto.ProductDto;
+import com.smart.smartApi.dto.ProductPageResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,4 +20,7 @@ public interface ProductService {
 
     void deleteProductById(Integer id) throws IOException;
 
+    ProductPageResponse getAllProductsWithPagination(Integer pageNumber, Integer pageSize);
+
+    ProductPageResponse getAllProductsWithPaginationAndSorting(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection);
 }

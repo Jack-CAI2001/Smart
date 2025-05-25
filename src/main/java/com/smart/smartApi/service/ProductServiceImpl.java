@@ -1,6 +1,7 @@
 package com.smart.smartApi.service;
 
 import com.smart.smartApi.dto.ProductDto;
+import com.smart.smartApi.dto.ProductPageResponse;
 import com.smart.smartApi.exception.ProductNotFoundException;
 import com.smart.smartApi.exception.StorageFileExistsException;
 import com.smart.smartApi.mapper.ProductMapper;
@@ -8,6 +9,10 @@ import com.smart.smartApi.model.Product;
 import com.smart.smartApi.repositories.ProductRepository;
 import com.smart.smartApi.utils.FileUtils;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -99,5 +104,31 @@ public class ProductServiceImpl implements ProductService {
             Files.deleteIfExists(path);
         }
         productRepository.deleteById(product.getId());
+    }
+
+    @Override
+    public ProductPageResponse getAllProductsWithPagination(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        return getProductPageResponse(pageNumber, pageSize, pageable);
+    }
+
+    @Override
+    public ProductPageResponse getAllProductsWithPaginationAndSorting(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection) {
+
+        Sort sort = sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+
+        return getProductPageResponse(pageNumber, pageSize, pageable);
+    }
+
+    private ProductPageResponse getProductPageResponse(Integer pageNumber, Integer pageSize, Pageable pageable) {
+        Page<Product> productPages = productRepository.findAll(pageable);
+        List<Product> productList = productPages.getContent();
+
+        List<ProductDto> productDtoList = productList.stream().map(productMapper::toDto).collect(Collectors.toList());
+        return new ProductPageResponse(productDtoList, pageNumber, pageSize, productPages.getTotalElements(), productPages.getTotalPages(), productPages.isLast());
     }
 }
