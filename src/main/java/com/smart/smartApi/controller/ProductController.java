@@ -1,65 +1,81 @@
 package com.smart.smartApi.controller;
 
 import com.smart.smartApi.dto.ProductDto;
-import com.smart.smartApi.mapper.ProductMapper;
-import com.smart.smartApi.model.Product;
-import com.smart.smartApi.repositories.ProductRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.smart.smartApi.dto.ProductPageResponse;
+import com.smart.smartApi.exception.EmptyFileException;
+import com.smart.smartApi.service.ProductService;
+import com.smart.smartApi.utils.AppConstants;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
-    private final ProductMapper productMapper;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
-    public ProductController(ProductMapper productMapper, ProductRepository productRepository) {
-        this.productMapper = productMapper;
-        this.productRepository = productRepository;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     @GetMapping("/{id}")
     public ProductDto getProductById(@PathVariable Integer id) {
-        return productRepository.findById(id)
-                .map(productMapper::toDto)
-                .orElseThrow(EntityNotFoundException::new);
+        return productService.getProductById(id);
     }
 
 
     @GetMapping
     public List<ProductDto> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(productMapper::toDto)
-                .collect(Collectors.toList());
+        return productService.getAllProducts();
     }
 
     @GetMapping("/search/{name}")
     public List<ProductDto> searchByName(@PathVariable String name) {
-        List<Product> productList = productRepository.findByName(name);
-        return productList.stream()
-                .map(productMapper::toDto)
-                .collect(Collectors.toList());
+        return productService.searchByName(name);
     }
 
-
     @PostMapping
-    public ProductDto saveProduct(@RequestBody @NonNull @Valid ProductDto productDto) {
-        Product productEntity = productMapper.toEntity(productDto);
-        return productMapper.toDto(productRepository.save(productEntity));
+    public ResponseEntity<ProductDto> addProduct(@RequestPart @NonNull @Valid ProductDto productDto, @RequestPart MultipartFile file) throws IOException, EmptyFileException {
+        if (file.isEmpty()) {
+            throw new EmptyFileException("File is empty! Please send another file!");
+        }
+
+        return new ResponseEntity<>(productService.addProduct(productDto, file), HttpStatus.CREATED);
     }
 
     @PutMapping("/update")
-    public ProductDto updateProduct(@RequestBody @NonNull ProductDto productDto) {
-        if (productDto.getId() == null)
-            throw new IllegalArgumentException("Product ID is missing. Use /new to create a product");
-        Product productEntity = productRepository.findById(productDto.getId()).orElseThrow(EntityNotFoundException::new);
+    public ResponseEntity<ProductDto> updateProduct(@RequestPart @NonNull ProductDto productDto, @RequestPart(required = false) MultipartFile file) throws IOException {
 
-        productEntity = productMapper.partialUpdate(productDto, productEntity);
-        return productMapper.toDto(productRepository.save(productEntity));
+        if (file == null || file.isEmpty()) file = null;
+
+        return ResponseEntity.ok(productService.updateProduct(productDto, file));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteProduct(@PathVariable Integer id) throws IOException {
+        productService.deleteProductById(id);
+        return ResponseEntity.ok("Product deleted successfully");
+    }
+
+    @GetMapping("/allProductsPage")
+    public ResponseEntity<ProductPageResponse> getAllProductsWithPagination(
+            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize) {
+        return ResponseEntity.ok(productService.getAllProductsWithPagination(pageNumber, pageSize));
+    }
+
+    @GetMapping("/allProductsPageAndSorting")
+    public ResponseEntity<ProductPageResponse> getAllProductsWithPaginationAndSorting(
+            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+            @RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
+            @RequestParam(defaultValue = AppConstants.SORT_BY, required = false) String sortBy,
+            @RequestParam(defaultValue = AppConstants.SORT_DIR, required = false) String sortDirection) {
+        return ResponseEntity.ok(productService.getAllProductsWithPaginationAndSorting(pageNumber, pageSize, sortBy, sortDirection));
     }
 }
