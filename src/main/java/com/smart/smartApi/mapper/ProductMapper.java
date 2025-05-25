@@ -6,7 +6,6 @@ import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ProductMapper {
-    @Mapping(target = "category.name", source = "category")
     Product toEntity(ProductDto productDto);
 
     @AfterMapping
@@ -14,10 +13,8 @@ public interface ProductMapper {
         product.getProductPromotions().forEach(productPromotion -> productPromotion.setProduct(product));
     }
 
-    @Mapping(target = "category", source = "category.name")
     ProductDto toDto(Product product);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "category.name", source = "category")
     Product partialUpdate(ProductDto productDto, @MappingTarget Product product);
 }

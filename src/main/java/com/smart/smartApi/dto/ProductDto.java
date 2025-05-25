@@ -23,6 +23,6 @@ public class ProductDto implements Serializable {
     BigDecimal price;
     Instant createdAt;
     String imageUrl;
-    String category;
+    CategoryDto category;
     Set<ProductPromotionDto> productPromotions;
 }
