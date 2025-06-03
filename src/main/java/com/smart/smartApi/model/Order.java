@@ -1,5 +1,6 @@
 package com.smart.smartApi.model;
 
+import com.smart.smartApi.auth.model.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

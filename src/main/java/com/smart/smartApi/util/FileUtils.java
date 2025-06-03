@@ -1,4 +1,4 @@
-package com.smart.smartApi.utils;
+package com.smart.smartApi.util;
 
 import com.smart.smartApi.controller.FileUploadController;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;

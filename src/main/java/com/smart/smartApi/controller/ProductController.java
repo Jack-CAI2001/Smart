@@ -4,11 +4,12 @@ import com.smart.smartApi.dto.ProductDto;
 import com.smart.smartApi.dto.ProductPageResponse;
 import com.smart.smartApi.exception.EmptyFileException;
 import com.smart.smartApi.service.ProductService;
-import com.smart.smartApi.utils.AppConstants;
+import com.smart.smartApi.util.AppConstants;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,6 +41,7 @@ public class ProductController {
         return productService.searchByName(name);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDto> addProduct(@RequestPart @NonNull @Valid ProductDto productDto, @RequestPart MultipartFile file) throws IOException, EmptyFileException {
         if (file.isEmpty()) {

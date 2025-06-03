@@ -1,4 +1,4 @@
-package com.smart.smartApi.repositories;
+package com.smart.smartApi.repository;
 
 import com.smart.smartApi.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

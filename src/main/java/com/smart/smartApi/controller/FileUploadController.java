@@ -2,7 +2,7 @@ package com.smart.smartApi.controller;
 
 import com.smart.smartApi.exception.StorageFileNotFoundException;
 import com.smart.smartApi.service.StorageService;
-import com.smart.smartApi.utils.FileUtils;
+import com.smart.smartApi.util.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

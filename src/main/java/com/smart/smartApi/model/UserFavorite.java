@@ -1,5 +1,6 @@
 package com.smart.smartApi.model;
 
+import com.smart.smartApi.auth.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
