@@ -78,10 +78,13 @@ public class ProductServiceImpl implements ProductService {
 
         Product productEntity = productRepository.findById(productDto.getId()).orElseThrow(EntityNotFoundException::new);
         if (file != null && !file.isEmpty()) {
-            String oldImagePath = productEntity.getImageUrl();
-            if (oldImagePath != null) {
-                Path oldPath = Paths.get(oldImagePath);
-                Files.deleteIfExists(oldPath);
+            String oldImageUrl
+                    = productEntity.getImageUrl();
+            if (oldImageUrl
+                    != null) {
+                String oldFileName = oldImageUrl.substring(oldImageUrl.lastIndexOf('/') + 1);
+                Path oldFilePath = storageService.load(oldFileName);
+                Files.deleteIfExists(oldFilePath);
             }
 
             if (Files.exists(storageService.load(file.getOriginalFilename()))) {
@@ -89,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
             }
 
             storageService.store(file);
-            productDto.setImageUrl(storageService.load(file.getOriginalFilename()).toString());
+            productDto.setImageUrl(FileUtils.buildFileAccessUrl(storageService.load(file.getOriginalFilename())));
         }
 
         productEntity = productMapper.partialUpdate(productDto, productEntity);
