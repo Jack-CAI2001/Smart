@@ -6,6 +6,7 @@ import com.smart.smartApi.util.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,6 +22,7 @@ public class FileUploadController {
         this.storageService = storageService;
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping()
     public List<String> listUploadedFiles() {
         return storageService.loadAll()
@@ -53,6 +55,7 @@ public class FileUploadController {
 
     }
 
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     @PostMapping()
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
         storageService.store(file);

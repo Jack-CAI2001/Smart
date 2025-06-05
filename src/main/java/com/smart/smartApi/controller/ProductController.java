@@ -51,6 +51,7 @@ public class ProductController {
         return new ResponseEntity<>(productService.addProduct(productDto, file), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/update")
     public ResponseEntity<ProductDto> updateProduct(@RequestPart @NonNull ProductDto productDto, @RequestPart(required = false) MultipartFile file) throws IOException {
 
@@ -59,6 +60,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.updateProduct(productDto, file));
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Integer id) throws IOException {
         productService.deleteProductById(id);
